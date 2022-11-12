@@ -24,9 +24,10 @@ data = data_raw %>% mutate(Date = as.Date(mdy_hms(`Created Date`)),
 data = data %>% filter(Descriptor == 'Rat Sighting' | Descriptor == 'Mouse Sighting' | Descriptor == 'Signs of Rodents')
 
 
-# Check for NA values in columns, drop those missing geographic data
+# Check for NA values in columns, drop those missing data (missing resolution allowed)
 sapply(data, function(y) any(is.na(y))) # displays which cols have NA values
-data = data %>% drop_na('Incident.Zip', 'Borough', 'City', 'Latitude', 'Longitude')
+data = data %>% drop_na('Incident.Zip', 'Borough', 'City', 'Latitude', 
+                        'Longitude', 'Location.Type')
 sapply(data, function(y) any(is.na(y))) 
 
 # Join with weather data
@@ -40,6 +41,8 @@ weatherdata = read_csv('./data/NOAA_GHCN_NY_Cntrl_Pk.csv') %>%
 
 data = data %>% inner_join(weatherdata)
 
+summary(data)
+
 # Reports by month, over years
 data %>% ggplot(aes(x=month(Date))) + 
          geom_bar(fill='brown', colour='black') +
@@ -47,25 +50,62 @@ data %>% ggplot(aes(x=month(Date))) +
 
 # Reports by Location Type
 data %>%  ggplot(aes(x=fct_rev(fct_infreq(Location.Type)))) + 
-          geom_bar(col='black', fill='red') + coord_flip() +
+          geom_bar(col='black', fill='brown') + coord_flip() +
           labs(x='Location Type', y = 'Total Reports (2010-2022)') +
           theme(axis.text = element_text(size=5))
 
-# Simple linear regression
+# Generate daily report totals with weather data
 
 daily_reports = data %>% group_by(Date) %>%
                          summarize(Reports = n()) %>%
                          inner_join(weatherdata) 
 
+# Plot overall line of best fit for reports against tmin
 daily_reports %>% ggplot(aes(x=TMIN, y=Reports)) +
                   geom_point() +
-                  geom_smooth(method='lm') +
-                  facet_wrap(vars(YEAR))
+                  geom_smooth(method='lm')
 
-ols = lm(Reports~.-Date -YEAR -MONTH -DAY, daily_reports)
+# Reports over time
+daily_reports %>% ggplot(aes(x=Date, y=Reports)) +
+                  geom_point()
+
+# TMIN over time
+daily_reports %>% ggplot(aes(x=Date, y=TMIN)) +
+                  geom_point()
+
+ols = lm(Reports ~ TMAX + TMIN + PRCP + SNOW, daily_reports)
 summary(ols)
 plot(ols)
 avPlots(ols)
+
+ols = lm(Reports ~ TMIN, daily_reports)
+plot(ols)
+summary(ols)
+
+residuals = daily_reports$Reports - predict(ols)
+
+# Residuals over time
+daily_reports %>% mutate(residuals = residuals) %>%
+                  ggplot(aes(x=Date, y=residuals)) +
+                  geom_point()
+
+# Comparing residuals of model trained on from one time period against another
+
+group1indices = which((daily_reports$YEAR >= 2017) & (daily_reports$YEAR <= 2019))
+group2indices = which((daily_reports$YEAR >= 2020) & (daily_reports$YEAR <= 2022))
+
+comparison_ols = lm(Reports ~ TMIN, daily_reports[c(group1indices, group2indices),])
+summary(comparison_ols)
+
+group1residuals = daily_reports[group1indices,]$Reports - predict(comparison_ols, daily_reports[group1indices,])
+group2residuals = daily_reports[group2indices,]$Reports - predict(comparison_ols, daily_reports[group2indices,])
+
+t.test(group1residuals, group2residuals)
+
+mean(group1residuals)
+mean(group2residuals)
+
+# Boxcox model
 
 boxcox = boxCox(ols)
 lambda = boxcox$x[which(boxcox$y == max(boxcox$y))]
@@ -75,8 +115,9 @@ summary(boxcox_ols)
 plot(boxcox_ols)
 plot(daily_reports$TMIN, boxcox_reports)
 
+boxcoxresiduals = boxcox_reports - predict(boxcox_ols)
 
-
-
-
+daily_reports %>% mutate(Residuals = boxcoxresiduals) %>%
+  ggplot(aes(x=Date, y=Residuals)) +
+  geom_point()
 
