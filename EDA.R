@@ -91,19 +91,29 @@ daily_reports %>% mutate(residuals = residuals) %>%
 
 # Comparing residuals of model trained on from one time period against another
 
-group1indices = which((daily_reports$YEAR >= 2017) & (daily_reports$YEAR <= 2019))
-group2indices = which((daily_reports$YEAR >= 2020) & (daily_reports$YEAR <= 2022))
+group1indices = which((daily_reports$YEAR >= 2018) & (daily_reports$YEAR <= 2019))
+group2indices = which((daily_reports$YEAR >= 2021) & (daily_reports$YEAR <= 2022))
 
 comparison_ols = lm(Reports ~ TMIN, daily_reports[c(group1indices, group2indices),])
 summary(comparison_ols)
+plot(comparison_ols)
 
-group1residuals = daily_reports[group1indices,]$Reports - predict(comparison_ols, daily_reports[group1indices,])
-group2residuals = daily_reports[group2indices,]$Reports - predict(comparison_ols, daily_reports[group2indices,])
+group1predictions = predict(comparison_ols, daily_reports[group1indices,])
+group1residuals = daily_reports[group1indices,]$Reports - group1predictions
+group2predictions = predict(comparison_ols, daily_reports[group2indices,])
+group2residuals = daily_reports[group2indices,]$Reports - group2predictions
 
 t.test(group1residuals, group2residuals)
 
 mean(group1residuals)
 mean(group2residuals)
+
+# visualize residuals of each group
+group1df = data.frame(Predictions=group1predictions, Residuals = group1residuals, Group = '1')
+group2df = data.frame(Predictions=group2predictions, Residuals = group2residuals, Group = '2')
+
+rbind(group1df, group2df) %>% ggplot(aes(x=Predictions, y=Residuals)) + 
+                              geom_point(aes(col=Group))
 
 # Boxcox model
 
