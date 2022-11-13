@@ -2,7 +2,7 @@ library(ggmap)
 library(tidyverse)
 library(lubridate)
 
-### Preparing mbackground map
+### Preparing background map
 
 nyc = get_stamenmap(bbox = c(left=-74.25, bottom = 40.5, 
                              right = -73.7, top = 40.87), 
@@ -57,4 +57,4 @@ daily_reports = data %>% group_by(Date) %>%
   inner_join(weatherdata) 
 
 # Sample map
-ggmap(nyc) + geom_point(data=data, aes(x=Longitude, y=Latitude), color='brown', size=0.1)
+# ggmap(nyc) + geom_point(data=data, aes(x=Longitude, y=Latitude), color='brown', size=0.1)
