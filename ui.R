@@ -13,12 +13,20 @@ dashboardPage(
   dashboardHeader(title='NYC 311 Rodent Complaints'),
   
   dashboardSidebar(
-    sidebarUserPanel('Your Name'),
     
-    dateRangeInput("daterange",
+    dateRangeInput("daterange1",
                    "Date Range of Complaints",
                    start = '2010-01-01',
-                   end = '2022-',
+                   end = '2022-11-02',
+                   min = '2010-01-01',
+                   max = '2022-11-02',
+    ),
+    
+    
+    dateRangeInput("daterange2",
+                   "Date Range of Complaints",
+                   start = '2010-01-01',
+                   end = '2022-11-02',
                    min = '2010-01-01',
                    max = '2022-11-02',
     )
@@ -26,11 +34,29 @@ dashboardPage(
   
   dashboardBody(
     tabsetPanel(
-      tabPanel('Map of Complaints', 
+      tabPanel('Complaint Visualizations', 
                fluidRow(
-                 plotOutput("RatMap")
+                 plotOutput("RatMap"),
+               plotOutput("DailyComplaints"),
+               plotOutput("LocationChart")
+               ),
+               ),
+               
+      
+      tabPanel('Comparison', 
+               "Daily minimum temperatures over date ranges",
+               
+               fluidRow(
+                 plotOutput("TemperaturesChart1"),
+                 plotOutput("TemperaturesChart2")
+               ),
+      
+               "Predicted report counts based on OLS against daily minimum temperatures",
+      
+               fluidRow(
+                 plotOutput("FittedComplaints1"),
+                 plotOutput("FittedComplaints2")
                )),
     )
   )
-  
 )
