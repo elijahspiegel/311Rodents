@@ -73,10 +73,10 @@ daily_reports %>% ggplot(aes(x=Date, y=Reports)) +
 daily_reports %>% ggplot(aes(x=Date, y=TMIN)) +
                   geom_point()
 
-ols = lm(Reports ~ TMAX + TMIN + PRCP + SNOW, daily_reports)
-summary(ols)
-plot(ols)
-avPlots(ols)
+ol_fulls = lm(Reports ~ TMAX + TMIN + PRCP + SNOW, daily_reports)
+summary(ols_full)
+plot(ols_full)
+avPlots(ols_full)
 
 ols = lm(Reports ~ TMIN, daily_reports)
 plot(ols)
@@ -84,15 +84,33 @@ summary(ols)
 
 residuals = daily_reports$Reports - predict(ols)
 
+# Feature engineering for cyclical data
+daily_reports = daily_reports %>% mutate(MONTH = as.numeric(MONTH))
+for (i in 2010:2022) {
+    ols_sin = lm(Reports ~ TMIN + 
+                   (YEAR > i) +
+                   sin(((pi/6) * MONTH)) + 
+                   cos(((pi/6) * MONTH)), daily_reports)
+    print(i)
+    print(summary(ols_sin))
+}
+
+# T-test, Wilcoxon Rank Sum Test
+
+group1indices = which((daily_reports$YEAR >= 2010) & (daily_reports$YEAR <= 2011))
+group2indices = which((daily_reports$YEAR >= 2012) & (daily_reports$YEAR <= 2013))
+
+t.test(daily_reports$Reports[group1indices], daily_reports$Reports[group2indices])
+
+wilcox.test(daily_reports$Reports[group1indices], daily_reports$Reports[group2indices])
+
+
 # Residuals over time
 daily_reports %>% mutate(residuals = residuals) %>%
                   ggplot(aes(x=Date, y=residuals)) +
                   geom_point()
 
 # Comparing residuals of model trained on from one time period against another
-
-group1indices = which((daily_reports$YEAR >= 2018) & (daily_reports$YEAR <= 2019))
-group2indices = which((daily_reports$YEAR >= 2021) & (daily_reports$YEAR <= 2022))
 
 comparison_ols = lm(Reports ~ TMIN, daily_reports[c(group1indices, group2indices),])
 summary(comparison_ols)

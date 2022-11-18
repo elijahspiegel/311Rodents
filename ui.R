@@ -47,16 +47,18 @@ dashboardPage(
                "Daily minimum temperatures over date ranges",
                
                fluidRow(
-                 plotOutput("TemperaturesChart1"),
-                 plotOutput("TemperaturesChart2")
+                 plotOutput("TemperaturesComparisonChart"),
                ),
-      
+
                "Predicted report counts based on OLS against daily minimum temperatures",
-      
+
                fluidRow(
-                 plotOutput("FittedComplaints1"),
-                 plotOutput("FittedComplaints2")
-               )),
+                 plotOutput("ReportsComparisonChart"),
+               ),
+               
+              verbatimTextOutput("ttest")
+               
+      )
     )
   )
 )
