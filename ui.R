@@ -15,50 +15,47 @@ dashboardPage(
   dashboardSidebar(
     
     dateRangeInput("daterange1",
-                   "Date Range of Complaints",
-                   start = '2010-01-01',
-                   end = '2022-11-02',
-                   min = '2010-01-01',
-                   max = '2022-11-02',
-    ),
-    
-    
-    dateRangeInput("daterange2",
-                   "Date Range of Complaints",
+                   "Primary Date Range",
                    start = '2010-01-01',
                    end = '2022-11-02',
                    min = '2010-01-01',
                    max = '2022-11-02',
     )
+    
   ),
   
   dashboardBody(
     tabsetPanel(
-      tabPanel('Complaint Visualizations', 
-               fluidRow(
-                 plotOutput("RatMap"),
-               plotOutput("DailyComplaints"),
-               plotOutput("LocationChart")
-               ),
-               ),
+      tabPanel('Complaint Exploration', 
+         fluidRow(
+            plotOutput("RatMap"),
+            plotOutput("DailyComplaints"),
+            plotOutput("LocationChart")
+         ),
+      ),
+      
+      tabPanel('Temperature Exploration',
+          fluidRow(
+            plotOutput("tempreportlinearplot"),
+            plotOutput("tempreporttimeplot")
+          )         
+      ),
                
       
-      tabPanel('Comparison', 
-               "Daily minimum temperatures over date ranges",
+      tabPanel('Date Range Comparisons', 
                
-               fluidRow(
-                 plotOutput("TemperaturesComparisonChart"),
-               ),
-
-               "Predicted report counts based on OLS against daily minimum temperatures",
-
-               fluidRow(
-                 plotOutput("ReportsComparisonChart"),
-               ),
-               
-              verbatimTextOutput("ttest")
-               
+         dateRangeInput("daterange2", "Secondary Date Range",
+                        start = '2010-01-01', end = '2022-11-02',
+                        min = '2010-01-01', max = '2022-11-02',),
+         
+         fluidRow(
+           plotOutput("TemperaturesComparisonChart"),
+           plotOutput("ReportsComparisonChart"),
+         ),
+         
+        verbatimTextOutput("wilcoxtest")
       )
+      
     )
   )
 )

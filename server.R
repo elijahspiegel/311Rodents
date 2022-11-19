@@ -39,6 +39,23 @@ shinyServer(function(input, output) {
                 theme(axis.text = element_text(size=10))
     })
     
+    output$tempreportlinearplot = renderPlot({
+      ggplot(data=daterange1(), aes(x=TMIN, y=Reports)) +
+         geom_point(col='brown') +
+         geom_smooth(method='lm')
+    })
+    
+    output$tempreporttimeplot = renderPlot({
+      ggplot(data=daterange1()) +
+        geom_point(aes(x=Date, y=Reports, colour='Reports', col='brown')) +
+        geom_point(aes(x=Date, y=TMIN, colour='TMIN', col='black')) +
+        scale_y_continuous(sec.axis=sec_axis(~., name='TMIN')) +
+        labs(color='Data Source') +
+        theme(legend.position='bottom')
+      
+    })
+    
+    
     daterange1 = reactive({
       daily_reports %>% filter(Date >= input$daterange1[1],
                                Date <= input$daterange1[2])
@@ -50,20 +67,25 @@ shinyServer(function(input, output) {
     })
     
     output$TemperaturesComparisonChart = renderPlot({
-      ggplot(data=daterange1(), aes(x=Date, y=TMIN, col='Range 1')) +
+      ggplot(data=daterange1(), aes(x=Date, y=TMIN, col='Primary Date Range')) +
         geom_point() +
-      geom_point(data=daterange2(), aes(x=Date, y=TMIN, col='Range 2'))
+      geom_point(data=daterange2(), aes(x=Date, y=TMIN, col='Secondary Date Range'))
     })
     
     output$ReportsComparisonChart = renderPlot({
-      ggplot(data=daterange1(), aes(x=Date, y=Reports, col='blue')) +
+      ggplot(data=daterange1(), aes(x=Date, y=Reports, col='Primary Date Range')) +
         geom_point() +
-        geom_point(data=daterange2(), aes(x=Date, y=Reports, col='red'))
+        geom_point(data=daterange2(), aes(x=Date, y=Reports, col='Secondary Date Range'))
     })
     
     output$ttest = renderPrint({
       ttest = t.test(daterange1()$Reports, daterange2()$Reports)
       ttest
+    })
+    
+    output$wilcoxtest = renderPrint({
+      wilcoxtest = wilcox.test(daterange1()$Reports, daterange2()$Reports)
+      wilcoxtest
     })
 
     
