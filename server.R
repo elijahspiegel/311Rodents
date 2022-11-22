@@ -19,7 +19,9 @@ shinyServer(function(input, output) {
                                                      Date <= input$daterange1[2])
                               
                               , aes(x=Longitude, y=Latitude), 
-                              color='brown', size=0.1)
+                              alpha=0.25, color='brown', size=0.1)  + 
+      labs(title="NYC 311 Rodent Sightings", 
+           subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
 
     })
     
@@ -27,7 +29,10 @@ shinyServer(function(input, output) {
       daily_reports %>% filter(Date >= input$daterange1[1],
                                Date <= input$daterange1[2]) %>%
                         ggplot(aes(x=Date, y=Reports)) +
-                        geom_point(col='brown')
+                        geom_point(col='brown') + 
+        labs(title="NYC 311 Rodent Sightings", 
+             subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]),
+             y = 'Daily Rodent Sightings', x = 'Date')
     })
     
     output$LocationChart = renderPlot({
@@ -35,22 +40,28 @@ shinyServer(function(input, output) {
                        Date <= input$daterange1[2]) %>%
                 ggplot(aes(x=fct_rev(fct_infreq(Location.Type)))) + 
                 geom_bar(col='black', fill='brown') + coord_flip() +
-                labs(x='Location Type', y = 'Total Reports') +
+                labs(title = "NYC 311 Rodent Sightings by Location Type", 
+                     subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]),
+                     x='Location Type', y = 'Total Reports') +
                 theme(axis.text = element_text(size=10))
     })
     
     output$tempreportlinearplot = renderPlot({
       ggplot(data=daterange1(), aes(x=TMIN, y=Reports)) +
-         geom_point(col='brown') +
-         geom_smooth(method='lm')
+        geom_point(col='brown') +
+        geom_smooth(method='lm') +
+        labs(title="NYC 311 Daily Rodent Sightings and Daily Minimum Temperature",
+             x = "Daily Minimum Temperature (ºC)",
+             y = "Daily Rodent Sightings")
     })
     
     output$tempreporttimeplot = renderPlot({
       ggplot(data=daterange1()) +
-        geom_point(aes(x=Date, y=Reports, colour='Reports', col='brown')) +
-        geom_point(aes(x=Date, y=TMIN, colour='TMIN', col='black')) +
-        scale_y_continuous(sec.axis=sec_axis(~., name='TMIN')) +
-        labs(color='Data Source') +
+        geom_point(aes(x=Date, y=Reports, colour='Daily Rodent Sightings')) +
+        geom_point(aes(x=Date, y=TMIN, colour='Daily Minimum temperature')) +
+        scale_y_continuous(sec.axis=sec_axis(~., name='Daily Minimum Temperature')) +
+        labs(title = "Daily NYC 311 Rodent Sightings and Minimum Temperature",
+             color='Data Source') +
         theme(legend.position='bottom')
       
     })
@@ -68,14 +79,22 @@ shinyServer(function(input, output) {
     
     output$TemperaturesComparisonChart = renderPlot({
       ggplot(data=daterange1(), aes(x=Date, y=TMIN, col='Primary Date Range')) +
-        geom_point() +
-      geom_point(data=daterange2(), aes(x=Date, y=TMIN, col='Secondary Date Range'))
+      geom_point() +
+      geom_point(data=daterange2(), aes(x=Date, y=TMIN, col='Secondary Date Range')) +
+      labs(title="Daily Minimum Temperature Over Time", 
+           subtitle=paste("From ", input$daterange1[1], " to ", input$daterange1[2], 
+                          " and ", input$daterange2[1], " to ", input$daterange2[2])) +
+      ylab("Daily Minimum Temperature (ºC)")
     })
     
     output$ReportsComparisonChart = renderPlot({
       ggplot(data=daterange1(), aes(x=Date, y=Reports, col='Primary Date Range')) +
-        geom_point() +
-        geom_point(data=daterange2(), aes(x=Date, y=Reports, col='Secondary Date Range'))
+      geom_point() +
+      geom_point(data=daterange2(), aes(x=Date, y=Reports, col='Secondary Date Range')) +
+      labs(title="311 Rodent Sightings Per Day", 
+           subtitle=paste("From ", input$daterange1[1], " to ", input$daterange1[2], 
+                          " and ", input$daterange2[1], " to ", input$daterange2[2])) +
+      ylab("Daily Rodent Sightings")
     })
     
     output$ttest = renderPrint({

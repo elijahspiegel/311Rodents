@@ -30,7 +30,7 @@ data = data_raw %>% mutate(Date = as.Date(mdy_hms(`Created Date`)),
          'Borough', 'Latitude', 'Longitude')
 
 # Keep only sightings and signs, i.e. exclude rat bites and condition attracting rodents
-data = data %>% filter(Descriptor == 'Rat Sighting' | Descriptor == 'Mouse Sighting' | Descriptor == 'Signs of Rodents')
+data = data %>% filter(Descriptor == 'Rat Sighting' | Descriptor == 'Mouse Sighting')
 
 
 # Check for NA values in columns, drop those missing data (missing resolution allowed)

@@ -10,7 +10,7 @@
 library(shinydashboard)
 
 dashboardPage(
-  dashboardHeader(title='NYC 311 Rodent Complaints'),
+  dashboardHeader(title='NYC Rodents'),
   
   dashboardSidebar(
     
@@ -52,8 +52,11 @@ dashboardPage(
            plotOutput("TemperaturesComparisonChart"),
            plotOutput("ReportsComparisonChart"),
          ),
-         
-        verbatimTextOutput("wilcoxtest")
+        
+         fluidRow(
+          verbatimTextOutput("ttest"),
+          verbatimTextOutput("wilcoxtest")
+         ),
       )
       
     )
