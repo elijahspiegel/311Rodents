@@ -28,6 +28,7 @@ dashboardPage(
     tabsetPanel(
       tabPanel('Complaint Exploration', 
          fluidRow(
+            uiOutput("dynamicmaptimeslider"),
             plotOutput("RatMap"),
             plotOutput("DailyComplaints"),
             plotOutput("LocationChart")

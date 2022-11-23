@@ -12,16 +12,29 @@ library(shiny)
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
+    output$dynamicmaptimeslider = renderUI({
+      sliderInput(inputId = "dynamicmaptimestep", 
+                  label = "Date:",
+                  min = as.Date(input$daterange1[1],"%Y-%m-%d"),
+                  max = as.Date(input$daterange1[2],"%Y-%m-%d"),
+                  value = as.Date(input$daterange1[2]), timeFormat="%Y-%m-%d", 
+                  step = 1,
+                  animate = animationOptions(interval = 300))
+    })
+  
 
     output$RatMap = renderPlot({
       
-      ggmap(nyc) + geom_point(data = data %>% filter(Date >= input$daterange1[1],
-                                                     Date <= input$daterange1[2])
-                              
+      ggmap(nyc) + 
+        geom_point(data = data %>% filter(Date >= input$daterange1[1],
+                                          Date < input$dynamicmaptimestep)
                               , aes(x=Longitude, y=Latitude), 
-                              alpha=0.25, color='brown', size=0.1)  + 
+                              alpha=0.25, color='brown', size=0.5)  + 
+        geom_point(data = data %>% filter(Date == input$dynamicmaptimestep)
+                   , aes(x=Longitude, y=Latitude), 
+                   alpha=1, color='blue', size=1)  + 
       labs(title="NYC 311 Rodent Sightings", 
-           subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
+           subtitle = paste("From ", input$daterange1[1], " to ", input$dynamicmaptimestep))
 
     })
     
