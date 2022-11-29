@@ -19,23 +19,21 @@ shinyServer(function(input, output) {
                   max = as.Date(input$daterange1[2],"%Y-%m-%d"),
                   value = as.Date(input$daterange1[2]), timeFormat="%Y-%m-%d", 
                   step = 1,
-                  animate = animationOptions(interval = 300))
+                  animate = animationOptions(interval = 500))
     })
   
 
     output$RatMap = renderPlot({
-      
       ggmap(nyc) + 
-        geom_point(data = data %>% filter(Date >= input$daterange1[1],
+        geom_point(data = data_geo %>% filter(Date >= input$daterange1[1],
                                           Date < input$dynamicmaptimestep)
                               , aes(x=Longitude, y=Latitude), 
                               alpha=0.25, color='brown', size=0.5)  + 
-        geom_point(data = data %>% filter(Date == input$dynamicmaptimestep)
+        geom_point(data = data_geo %>% filter(Date == input$dynamicmaptimestep)
                    , aes(x=Longitude, y=Latitude), 
                    alpha=1, color='blue', size=1)  + 
       labs(title="NYC 311 Rodent Sightings", 
            subtitle = paste("From ", input$daterange1[1], " to ", input$dynamicmaptimestep))
-
     })
     
     output$DailyComplaints = renderPlot({
@@ -56,7 +54,7 @@ shinyServer(function(input, output) {
                 labs(title = "NYC 311 Rodent Sightings by Location Type", 
                      subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]),
                      x='Location Type', y = 'Total Reports') +
-                theme(axis.text = element_text(size=10))
+                theme(axis.text = element_text(size=9))
     })
     
     output$tempreportlinearplot = renderPlot({
@@ -118,6 +116,84 @@ shinyServer(function(input, output) {
     output$wilcoxtest = renderPrint({
       wilcoxtest = wilcox.test(daterange1()$Reports, daterange2()$Reports)
       wilcoxtest
+    })
+    
+    # output$boroughchart = renderPlot({
+    #   daily_reports_boro %>%  filter(Date >= input$daterange1[1],
+    #                    Date <= input$daterange1[2],
+    #                    Borough != 'Unspecified') %>%
+    #     group_by(Borough) %>%
+    #     summarise(Total = sum(Reports),
+    #               `Total per capita` = sum(Reports) / boroughstats[first(Borough), 'Population'],
+    #               `Total per sq. mi.` = sum(Reports) / boroughstats[first(Borough), 'Area'],
+    #               `Total per person per sq. mi.` = sum(Reports) / boroughstats[first(Borough), 'Density']) %>%
+    #     pivot_longer(2:5, names_to='Type', 'values_to'='value') %>%
+    #     ggplot(aes(x=Borough)) + 
+    #     geom_bar(stat='identity', aes(fill=Type, y=value), position='dodge') +
+    #     labs(title = "NYC 311 Rodent Sightings by Borough", 
+    #          subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
+    # })
+    
+    output$boroughchart = renderPlot({
+      daily_reports_boro %>%  filter(Date >= input$daterange1[1],
+                                     Date <= input$daterange1[2],
+                                     Borough != 'Unspecified') %>%
+        group_by(Borough) %>%
+        summarise(Total = sum(Reports)) %>%
+        ggplot(aes(x=Borough)) + 
+        geom_bar(stat='identity', fill='brown', aes(y=Total)) +
+        labs(title = "NYC 311 Rodent Sightings by Borough", 
+             subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
+    })
+    
+    output$boroughchartpercapita = renderPlot({
+      daily_reports_boro %>%  filter(Date >= input$daterange1[1],
+                                     Date <= input$daterange1[2],
+                                     Borough != 'Unspecified') %>%
+        group_by(Borough) %>%
+        summarise(`Total per capita` = sum(Reports) / boroughstats[first(Borough), 'Population']) %>%
+        ggplot(aes(x=Borough)) + 
+        geom_bar(stat='identity', fill='brown', aes(y=`Total per capita`)) +
+        labs(title = "NYC 311 Rodent Sightings by Borough per capita", 
+             subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
+    })
+    
+    output$boroughchartpersqmi = renderPlot({
+      daily_reports_boro %>%  filter(Date >= input$daterange1[1],
+                                     Date <= input$daterange1[2],
+                                     Borough != 'Unspecified') %>%
+        group_by(Borough) %>%
+        summarise(`Total per sq. mi.` = sum(Reports) / boroughstats[first(Borough), 'Area']) %>%
+        ggplot(aes(x=Borough)) + 
+        geom_bar(stat='identity', fill='brown', aes(y=`Total per sq. mi.`)) +
+        labs(title = "NYC 311 Rodent Sightings by Borough per Square Mile", 
+             subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
+    })
+    
+    output$boroughchartperdensity = renderPlot({
+      daily_reports_boro %>%  filter(Date >= input$daterange1[1],
+                                     Date <= input$daterange1[2],
+                                     Borough != 'Unspecified') %>%
+        group_by(Borough) %>%
+        summarise(`Total per person per sq. mi.` = sum(Reports) / boroughstats[first(Borough), 'Density']) %>%
+        ggplot(aes(x=Borough)) + 
+        geom_bar(stat='identity', fill='brown', aes(y=`Total per person per sq. mi.`)) +
+        labs(title = "NYC 311 Rodent Sightings by Borough per Density (person per square mile)", 
+             subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
+    })
+      
+      
+    output$boroughsightingschart = renderPlot({
+      daily_reports_boro %>% filter(Date >= input$daterange1[1],
+                               Date <= input$daterange1[2],
+                               Borough != 'Unspecified') %>%
+        ggplot(aes(x=Date, y=Reports)) +
+        geom_point(col='brown', size=0.5) + 
+        facet_wrap(vars(Borough)) +
+        labs(title="NYC 311 Rodent Sightings", 
+             subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]),
+             y = 'Daily Rodent Sightings', x = 'Date') +
+        ylim(c(0, 75))
     })
 
     

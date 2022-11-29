@@ -58,7 +58,18 @@ dashboardPage(
           verbatimTextOutput("ttest"),
           verbatimTextOutput("wilcoxtest")
          ),
-      )
+      ),
+      
+      tabPanel('Borough Exploration',
+               fluidRow(
+                 plotOutput("boroughsightingschart"),
+                 plotOutput("boroughchart"),
+                 plotOutput("boroughchartpercapita"),
+                 plotOutput("boroughchartpersqmi"),
+                 plotOutput("boroughchartperdensity")
+                 
+               )         
+      ),
       
     )
   )

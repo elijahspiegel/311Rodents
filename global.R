@@ -4,12 +4,11 @@ library(lubridate)
 
 ### Preparing background map
 
-nyc = get_stamenmap(bbox = c(left=-74.25, bottom = 40.5, 
-                             right = -73.7, top = 40.87), 
+nyc = get_stamenmap(bbox = c(left= -74.26, bottom = 40.49, 
+                             right = -73.6, top = 40.92), 
                     zoom = 11,
                     maptype='terrain')
 
-# ggmap(nyc) 
 
 ### Preparing data
 
@@ -50,11 +49,26 @@ weatherdata = read_csv('./data/NOAA_GHCN_NY_Cntrl_Pk.csv') %>%
 
 data = data %>% inner_join(weatherdata)
 
+# Generate info with lat-long
+
+data_geo = data %>% select('Date', 'Latitude', 'Longitude')
+
 # Generate daily report totals with weather data
 
 daily_reports = data %>% group_by(Date) %>%
   summarize(Reports = n()) %>%
   inner_join(weatherdata) 
 
-# Sample map
-# ggmap(nyc) + geom_point(data=data, aes(x=Longitude, y=Latitude), color='brown', size=0.1)
+daily_reports_boro = data %>% group_by(Date, Borough) %>%
+  summarize(Reports = n()) %>%
+  inner_join(weatherdata) 
+
+
+boroughstats = data.frame(
+  # Statistics from Wikipedia, sourced from 2020 census
+  Population = c(1472654, 2736074, 1694263, 2405464, 495747),
+  Area = c(42.2, 69.4, 22.7, 108.7, 57.5),
+  Density = c(34920, 39438, 74781, 22125, 8618)
+)
+rownames(boroughstats) = c('BRONX', 'BROOKLYN', 'MANHATTAN', 'QUEENS', 'STATEN ISLAND')
+
