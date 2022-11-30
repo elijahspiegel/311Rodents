@@ -63,6 +63,32 @@ daily_reports_boro = data %>% group_by(Date, Borough) %>%
   summarize(Reports = n()) %>%
   inner_join(weatherdata) 
 
+# For analysis of rodent sightings versus open restaurant applications
+
+restaurant_applications_approved = read_csv("./data/Open_Restaurant_Applications.csv") %>%
+  select('Postcode', 'Approved for Sidewalk Seating', 'Approved for Roadway Seating',
+         'Time of Submission', 'Latitude', 'Longitude') %>%
+  mutate(Approved = (`Approved for Sidewalk Seating` == 'yes' | `Approved for Roadway Seating` == 'yes')) %>%
+  filter(Approved == TRUE) 
+
+restaurant_counts_zip = restaurant_applications_approved %>%
+  group_by(Postcode) %>%
+  summarize(Restaurants = n())
+
+post_reopening_reports_zip = data %>% filter(Date >= ymd("2020-06-19")) %>%
+  group_by(Incident.Zip) %>%
+  summarize(Reports = n()) %>%
+  transmute(Postcode = Incident.Zip, Reports=Reports)
+
+populations_zip = read_csv("./data/nyc_zip_borough_neighborhoods_pop.csv") %>%
+  transmute(Postcode = zip, Population = population)
+
+restaurants_reports_zip = restaurant_counts_zip %>%
+  inner_join(post_reopening_reports_zip) %>% 
+  inner_join(populations_zip) %>%
+  mutate(Restaurants.per.capita = Restaurants / Population,
+         Reports.per.capita = Reports / Population)
+
 
 boroughstats = data.frame(
   # Statistics from Wikipedia, sourced from 2020 census

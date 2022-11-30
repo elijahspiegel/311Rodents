@@ -118,22 +118,6 @@ shinyServer(function(input, output) {
       wilcoxtest
     })
     
-    # output$boroughchart = renderPlot({
-    #   daily_reports_boro %>%  filter(Date >= input$daterange1[1],
-    #                    Date <= input$daterange1[2],
-    #                    Borough != 'Unspecified') %>%
-    #     group_by(Borough) %>%
-    #     summarise(Total = sum(Reports),
-    #               `Total per capita` = sum(Reports) / boroughstats[first(Borough), 'Population'],
-    #               `Total per sq. mi.` = sum(Reports) / boroughstats[first(Borough), 'Area'],
-    #               `Total per person per sq. mi.` = sum(Reports) / boroughstats[first(Borough), 'Density']) %>%
-    #     pivot_longer(2:5, names_to='Type', 'values_to'='value') %>%
-    #     ggplot(aes(x=Borough)) + 
-    #     geom_bar(stat='identity', aes(fill=Type, y=value), position='dodge') +
-    #     labs(title = "NYC 311 Rodent Sightings by Borough", 
-    #          subtitle = paste("From ", input$daterange1[1], " to ", input$daterange1[2]))
-    # })
-    
     output$boroughchart = renderPlot({
       daily_reports_boro %>%  filter(Date >= input$daterange1[1],
                                      Date <= input$daterange1[2],
@@ -196,6 +180,14 @@ shinyServer(function(input, output) {
         ylim(c(0, 75))
     })
 
-    
+    output$restaurantsightingsgraph = renderPlot({
+      restaurants_reports_zip %>% 
+        ggplot(aes(x=Restaurants.per.capita, y=Reports.per.capita)) +
+        geom_point(color='brown') +
+        geom_smooth(method='lm') +
+        labs(title = "NYC 311 Rodent Sightings per capita versus Accepted Open Restaurant Applications per Capita by Zip Code",
+             subtitle = "From 2020-06-19 to 2022-11-02",
+             y = 'Total Rodent Sightings per capita', x='Accepted Open Restaurant Applications per capita')
+    })
     
 })

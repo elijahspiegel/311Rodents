@@ -71,6 +71,12 @@ dashboardPage(
                )         
       ),
       
+      tabPanel('Open Restaurants Exploration',
+               fluidRow(
+                 plotOutput("restaurantsightingsgraph")
+               )
+      )
+      
     )
   )
 )
