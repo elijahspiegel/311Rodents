@@ -73,7 +73,8 @@ dashboardPage(
       
       tabPanel('Open Restaurants Exploration',
                fluidRow(
-                 plotOutput("restaurantsightingsgraph")
+                 plotOutput("restaurantsightingsgraph"),
+                 verbatimTextOutput("restaurantsightingsdescription")
                )
       )
       

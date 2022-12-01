@@ -190,4 +190,10 @@ shinyServer(function(input, output) {
              y = 'Total Rodent Sightings per capita', x='Accepted Open Restaurant Applications per capita')
     })
     
+    output$restaurantsightingsdescription = renderPrint({
+      model = lm(Reports.per.capita~Restaurants.per.capita, restaurants_reports_zip)
+      out = summary(model)
+      out
+    })
+    
 })
