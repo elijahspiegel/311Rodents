@@ -50,8 +50,8 @@ dashboardPage(
                         min = '2010-01-01', max = '2022-11-02',),
          
          fluidRow(
-           plotOutput("TemperaturesComparisonChart"),
            plotOutput("ReportsComparisonChart"),
+           plotOutput("TemperaturesComparisonChart"),
          ),
         
          fluidRow(
@@ -65,8 +65,7 @@ dashboardPage(
                  plotOutput("boroughsightingschart"),
                  plotOutput("boroughchart"),
                  plotOutput("boroughchartpercapita"),
-                 plotOutput("boroughchartpersqmi"),
-                 plotOutput("boroughchartperdensity")
+                 plotOutput("boroughchartpersqmi")
                  
                )         
       ),

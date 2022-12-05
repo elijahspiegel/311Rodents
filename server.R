@@ -110,12 +110,14 @@ shinyServer(function(input, output) {
     
     output$ttest = renderPrint({
       ttest = t.test(daterange1()$Reports, daterange2()$Reports)
-      ttest
+      paste("The p-value of a two-sided T-test between the reports of the two date ranges is",
+            ttest$p.value)
     })
     
     output$wilcoxtest = renderPrint({
       wilcoxtest = wilcox.test(daterange1()$Reports, daterange2()$Reports)
-      wilcoxtest
+      paste("The p-value of a Wilcoxon Rank Sum test between the reports of the two date ranges is",
+            wilcoxtest$p.value)
     })
     
     output$boroughchart = renderPlot({
@@ -193,7 +195,9 @@ shinyServer(function(input, output) {
     output$restaurantsightingsdescription = renderPrint({
       model = lm(Reports.per.capita~Restaurants.per.capita, restaurants_reports_zip)
       out = summary(model)
-      out
+      paste("The independent variable explains", 
+            scales::label_percent()(out$adj.r.squared), 
+            "of the data (adjusted R-squared).")
     })
     
 })
